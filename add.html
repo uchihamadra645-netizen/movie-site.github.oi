@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Add Movie – HiJaVerse Admin Helper</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">H J V</div>
+        <div class="title">Admin – Add Movie</div>
+      </div>
+      <a class="btn ghost" href="index.html">⬅ Back</a>
+    </div>
+
+    <div class="notice">
+      This is a <b>static helper</b>. It updates a local copy of <kbd>movies.json</kbd> in your browser and lets you <b>download</b> the new file. 
+      Then upload that new <kbd>movies.json</kbd> to your hosting (Netlify/GitHub). No pirated content.
+    </div>
+
+    <hr>
+
+    <form id="f">
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:10px">
+        <input placeholder="ID (unique, e.g., hjv-001)" required>
+        <input placeholder="Title" required>
+        <input placeholder="Year (e.g., 2025)" required>
+        <input placeholder="Genres (comma separated)" required>
+        <input placeholder="Poster URL" required>
+        <select>
+          <option value="youtube">YouTube</option>
+          <option value="drive">Google Drive (preview)</option>
+          <option value="mp4">Direct MP4</option>
+        </select>
+        <input placeholder="Watch URL (YouTube embed / Drive preview / MP4 URL)" required>
+        <input placeholder="Download URL" required>
+        <input placeholder="Rating (e.g., PG-13)">
+        <input placeholder="Tags (comma separated)">
+      </div>
+      <textarea placeholder="Description" style="width:100%;height:100px;margin-top:10px"></textarea>
+      <div style="margin-top:10px;display:flex;gap:10px">
+        <button class="btn" type="submit">Add to List</button>
+        <button class="btn ghost" type="button" id="save">Download movies.json</button>
+      </div>
+    </form>
+
+    <hr>
+    <h3>Preview</h3>
+    <pre id="out" class="notice" style="white-space:pre-wrap"></pre>
+  </div>
+
+<script>
+let list = [];
+async function init(){
+  try{
+    const res = await fetch('movies.json');
+    list = await res.json();
+    render();
+  }catch(e){ list = []; }
+}
+function render(){ document.getElementById('out').textContent = JSON.stringify(list, null, 2); }
+
+document.getElementById('f').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const inputs = e.target.querySelectorAll('input, select, textarea');
+  const v = Array.from(inputs).map(x=>x.value.trim());
+  const [id,title,year,genres,poster,watch_type,watch_url,download_url,rating,tags,desc] = [v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8],v[9],v[10]];
+  const item = {
+    id, title, year: Number(year)||year, genre: genres.split(',').map(s=>s.trim()).filter(Boolean),
+    poster, watch_type, watch_url, download_url, rating, description: desc, tags: tags.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  if(!id){ alert('ID required'); return; }
+  const exists = list.find(x=>x.id===id);
+  if(exists && !confirm('ID exists. Replace?')) return;
+  if(exists){ Object.assign(exists, item); } else { list.push(item); }
+  render();
+  alert('Added! Now click "Download movies.json" to save and upload to hosting.');
+});
+
+document.getElementById('save').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(list, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'movies.json';
+  a.click();
+});
+init();
+</script>
+</body>
+</html>

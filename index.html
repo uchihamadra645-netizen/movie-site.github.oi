@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HiJaVerse Movies – By Jayanta & Himashree</title>
+  <meta name="description" content="HiJaVerse: trailers, legal films, and links.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">H J V</div>
+        <div class="title">HiJaVerse Movies</div>
+      </div>
+      <div class="search"><input id="q" placeholder="Search movies, year, genre..."></div>
+      <div class="nav">
+        <a class="btn" href="add.html">Add Movie</a>
+        <a class="btn ghost" href="https://instagram.com/__mighty__jay__" target="_blank">Instagram</a>
+      </div>
+    </div>
+
+    
+    <div class="ad">👦👧 Cartoon Section Added — Kids & Family</div>
+    <div class="ad">Ad space (AdSense/Affiliate)</div>
+    <div id="grid" class="grid"></div>
+
+    <footer>© 2025 HiJaVerse • By Jayanta × Himashree • Legal content only.</footer>
+  </div>
+
+<script>
+async function load(){
+  const res = await fetch('movies.json');
+  const data = await res.json();
+  const grid = document.getElementById('grid');
+  const input = document.getElementById('q');
+
+  function card(m){
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = \`
+      <img src="\${m.poster}" alt="\${m.title} poster">
+      <div class="body">
+        <span class="badge">\${m.year}</span>
+        <span class="badge">\${(m.genre||[]).join(', ')}</span>
+        <div class="title2">\${m.title}</div>
+        <div class="meta">\${m.description||''}</div>
+        <a class="btn" href="movie.html?id=\${encodeURIComponent(m.id)}">Watch</a>
+      </div>\`;
+    return el;
+  }
+
+  function render(list){
+    grid.innerHTML = '';
+    list.forEach(m => grid.appendChild(card(m)));
+  }
+
+  render(data);
+
+  input.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    const filtered = data.filter(m =>
+      (m.title||'').toLowerCase().includes(q) ||
+      (m.genre||[]).join(' ').toLowerCase().includes(q) ||
+      String(m.year).includes(q)
+    );
+    render(filtered);
+  });
+}
+load();
+</script>
+</body>
+</html>
